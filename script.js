@@ -254,14 +254,28 @@ function getRandomCard(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function showCardDetail(cardId) {
-  const modal = document.getElementById('card-modal');
-  modal.classList.remove('hidden');
-  document.getElementById('modal-img').src = `cards/${cardId}.png`;
-  document.getElementById('card-title').innerText = `${cardId} - ${cardData[cardId].name}`;
-  document.getElementById('card-desc').innerText = cardData[cardId].desc;
-}
+function showCardDetail(card, isReversed) {
+  const modal = document.getElementById("card-modal");
+  const modalImg = document.getElementById("modal-img");
+  const cardTitle = document.getElementById("card-title");
+  const cardDesc = document.getElementById("card-desc");
 
+  // 設定圖片來源
+  modalImg.src = card.image;
+  modalImg.alt = card.name;
+
+  // 顯示名稱與正逆位狀態
+  const orientationText = isReversed ? "（逆位）" : "（正位）";
+  cardTitle.textContent = `${card.name} ${orientationText}`;
+
+  // 顯示圖像建議與正/逆位說明
+  cardDesc.innerHTML = `
+    <p><strong>圖像意象：</strong>${card.suggest}</p>
+    <p><strong>${isReversed ? "逆位含義" : "正位含義"}：</strong>${isReversed ? card.reversed : card.upright}</p>
+  `;
+
+  modal.classList.remove("hidden");
+}
 function closeModal() {
   document.getElementById('card-modal').classList.add('hidden');
 }
