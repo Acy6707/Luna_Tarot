@@ -51,15 +51,38 @@
       background-color: #666;
     }
 
-    .card-area {
+    .card-area, .card-left, .card-center, .card-right {
       position: absolute;
+      display: flex;
+      gap: 12px;
+      z-index: 2;
+    }
+
+    .card-area {
       bottom: 100px;
       left: 50%;
       transform: translateX(-50%);
-      display: flex;
       justify-content: center;
-      gap: 12px;
-      z-index: 2;
+    }
+
+    .card-left {
+      left: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      flex-direction: column;
+    }
+
+    .card-center {
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .card-right {
+      right: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      flex-direction: column;
     }
 
     .card {
@@ -71,7 +94,7 @@
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.4);
       cursor: pointer;
-      transition: transform 0.6s ease, top 0.5s ease, left 0.5s ease, opacity 0.5s;
+      transition: transform 0.6s ease, opacity 0.5s;
     }
 
     .floating {
@@ -85,12 +108,10 @@
     }
 
     .flipped {
-      transform: rotateY(180deg);
       background-image: none;
     }
 
     .disappear {
-      top: -200px !important;
       opacity: 0;
     }
   </style>
@@ -101,89 +122,101 @@
     <button id="start-btn" onclick="showOptions()">開始占卜</button>
   </div>
   <div class="card-area" id="card-area"></div>
+  <div class="card-left" id="card-left"></div>
+  <div class="card-center" id="card-center"></div>
+  <div class="card-right" id="card-right"></div>
 
   <script>
     const dialogue = document.getElementById('dialogue');
     const cardArea = document.getElementById('card-area');
-    let drawCount = 0;
-    let drawn = 0;
-    let drawnCards = [];
-    let allCards = [];
+    const leftArea = document.getElementById('card-left');
+    const centerArea = document.getElementById('card-center');
+    const rightArea = document.getElementById('card-right');
+    let mode = "";
+    let drawPlan = { left: 0, center: 0, right: 0 };
+    let drawnMap = { left: false, center: false, right: false };
 
     function showOptions() {
       dialogue.innerHTML = `<p>你想進行哪種占卜呢…？</p>
         <div class="options">
-          <button onclick="beginShuffle(1)">初見之禮</button>
-          <button onclick="beginShuffle(1)">單影啟示</button>
-          <button onclick="beginShuffle(3)">月環三問</button>
-          <button onclick="beginShuffle(5)">影徑之門</button>
+          <button onclick="beginShuffle('single')">初見之禮</button>
+          <button onclick="beginShuffle('single')">單影啟示</button>
+          <button onclick="beginShuffle('triple')">月環三問</button>
+          <button onclick="beginShuffle('five')">影徑之門</button>
         </div>`;
     }
 
-    function beginShuffle(count) {
-      drawCount = count;
-      drawn = 0;
-      drawnCards = [];
+    function beginShuffle(selectedMode) {
+      mode = selectedMode;
+      drawPlan = { left: 0, center: 0, right: 0 };
+      drawnMap = { left: false, center: false, right: false };
+      cardArea.innerHTML = leftArea.innerHTML = centerArea.innerHTML = rightArea.innerHTML = "";
+
       dialogue.innerHTML = `<p>請稍候，正在洗牌中...</p>`;
-      setTimeout(generateCards, 1200);
+      setTimeout(() => {
+        if (mode === 'single') {
+          drawPlan.center = 1;
+          generateCards(centerArea, 1, 8, 'center');
+        } else if (mode === 'triple') {
+          drawPlan = { left: 1, center: 1, right: 1 };
+          generateCards(leftArea, 9, 15, 'left');
+          generateCards(centerArea, 1, 8, 'center');
+          generateCards(rightArea, 16, 22, 'right');
+        } else if (mode === 'five') {
+          drawPlan = { left: 1, center: 3, right: 1 };
+          generateCards(leftArea, 9, 15, 'left');
+          generateCards(centerArea, 1, 8, 'center');
+          generateCards(rightArea, 16, 22, 'right');
+        }
+        updatePrompt();
+      }, 1000);
     }
 
-    function generateCards() {
-      cardArea.innerHTML = '';
-      allCards = [];
-
-      for (let i = 0; i < 8; i++) {
+    function generateCards(container, start, end, zone) {
+      for (let i = start; i <= end; i++) {
         const card = document.createElement('div');
-        card.classList.add('card', 'floating');
-        card.dataset.index = i + 1;
+        card.className = 'card floating';
+        card.dataset.index = i;
+        card.dataset.zone = zone;
         card.onclick = () => drawCard(card);
-        allCards.push(card);
-        cardArea.appendChild(card);
+        container.appendChild(card);
       }
-
-      dialogue.innerHTML = `<p>請選擇 ${drawCount} 張卡牌</p>`;
     }
 
     function drawCard(card) {
-      if (card.classList.contains('flipped') || drawn >= drawCount) return;
+      const zone = card.dataset.zone;
+      if (drawnMap[zone]) return;
+
+      const selected = document.querySelectorAll(`.card[data-zone="${zone}"].flipped`).length;
+      if (selected >= drawPlan[zone]) return;
 
       card.classList.remove('floating');
-      card.style.transform = 'translateY(-20px)';
       card.classList.add('flipped');
-      drawnCards.push(card);
-      drawn++;
+      card.style.backgroundImage = `url('cards/card${card.dataset.index}.png')`;
+      card.style.transform = 'scale(1.2)';
 
-      if (drawn < drawCount) {
-        dialogue.innerHTML = `<p>請再選擇 ${drawCount - drawn} 張卡牌</p>`;
-      } else {
-        dialogue.innerHTML = `<p>抽牌完成，展示結果...</p>`;
-        setTimeout(revealResults, 1000);
+      if (mode === 'single' || mode === 'triple') {
+        drawnMap[zone] = true;
       }
+
+      updatePrompt();
     }
 
-    function revealResults() {
-      // 移除未抽中卡
-      allCards.forEach(card => {
-        if (!drawnCards.includes(card)) {
-          card.classList.remove('floating');
-          card.classList.add('disappear');
-          setTimeout(() => card.remove(), 800);
-        }
-      });
+    function updatePrompt() {
+      const needLeft = drawPlan.left - document.querySelectorAll('.card-left .flipped').length;
+      const needCenter = drawPlan.center - document.querySelectorAll('.card-center .flipped').length;
+      const needRight = drawPlan.right - document.querySelectorAll('.card-right .flipped').length;
 
-      // 翻牌展示抽到的卡
-      drawnCards.forEach((card, idx) => {
-        setTimeout(() => {
-          card.classList.add('flipped');
-          card.style.backgroundImage = `url('cards/card${card.dataset.index}.png')`;
-        }, 1000 + idx * 600);
-      });
-
-      // 最後更新提示語
-      setTimeout(() => {
+      if (needLeft <= 0 && needCenter <= 0 && needRight <= 0) {
         dialogue.innerHTML = `<p>抽卡結束，請將結果截圖下來後找露娜小姐解牌吧</p>`;
-      }, 1000 + drawnCards.length * 600 + 500);
+      } else {
+        dialogue.innerHTML = `<p>請抽取卡牌</p>
+        ${drawPlan.left > 0 ? `<p>左側還需：${needLeft}</p>` : ''}
+        ${drawPlan.center > 0 ? `<p>中間還需：${needCenter}</p>` : ''}
+        ${drawPlan.right > 0 ? `<p>右側還需：${needRight}</p>` : ''}`;
+      }
     }
   </script>
 </body>
 </html>
+
