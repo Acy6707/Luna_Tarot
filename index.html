@@ -2,138 +2,42 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>塔羅牌占卜</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Helvetica Neue', sans-serif;
-      background: url("bg/background.jpg") no-repeat center center fixed;
-      background-size: cover;
-      color: white;
-      overflow: hidden;
-    }
-
-    #start-screen, #mode-selection, #card-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-
-    #start-button, .mode-btn {
-      padding: 1rem 2rem;
-      font-size: 1.2rem;
-      margin: 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background-color: rgba(255, 255, 255, 0.9);
-      color: #333;
-      transition: background-color 0.3s;
-    }
-
-    .mode-btn:hover, #start-button:hover {
-      background-color: #ccc;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    /* Modal 樣式 */
-    #card-modal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-    }
-
-    .modal-content {
-      background: white;
-      color: black;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      max-width: 500px;
-      margin: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .modal-content img {
-      width: 150px;
-      height: 250px;
-      object-fit: cover;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-
-    .modal-text {
-      text-align: left;
-      max-width: 300px;
-    }
-
-    #card-title {
-      font-weight: bold;
-      font-size: 1.2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    #card-desc {
-      font-size: 1rem;
-      line-height: 1.4;
-    }
-
-    .modal-content button {
-      margin-top: 1.5rem;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      background-color: #333;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>塔羅占卜</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <!-- 背景圖已從此移除 -->
+  <div class="background">
+    <img src="bg/background.jpg" alt="背景圖" class="background-img" />
+  </div>
 
-    <div id="start-screen">
-      <button id="start-button">開始占卜</button>
+  <div class="main-container">
+    <div id="start-screen" class="screen">
+      <button id="start-button" class="start-button">開始占卜</button>
     </div>
-    
-    <div id="mode-selection" class="hidden">
-      <p>選擇占卜模式：</p>
-      <button class="mode-btn" data-mode="gift">初見之禮</button>
-      <button class="mode-btn" data-mode="solo">單影啟示</button>
-      <button class="mode-btn" data-mode="triple">月環三問</button>
-      <button class="mode-btn" data-mode="path">影徑之門</button>
+
+    <div id="mode-selection" class="screen hidden">
+      <p>請選擇占卜模式：</p>
+      <div class="mode-buttons">
+        <button class="mode-button" data-mode="gift">初見之禮</button>
+        <button class="mode-button" data-mode="single">單影啟示</button>
+        <button class="mode-button" data-mode="triple">月環三問</button>
+        <button class="mode-button" data-mode="path">影徑之門</button>
+      </div>
     </div>
-    
-    <div id="card-area" class="hidden"></div>
-    
-    <!-- Modal 視窗 -->
-    <div id="card-modal" class="hidden">
-      <div class="modal-content">
-        <div style="display: flex; flex-direction: row; gap: 1rem;">
-          <img id="modal-img" />
-          <div class="modal-text">
-            <p id="card-title"></p>
-            <p id="card-desc"></p>
-          </div>
+
+    <div id="card-container" class="card-container hidden"></div>
+
+    <div id="card-detail" class="card-detail hidden">
+      <div class="card-detail-content">
+        <span id="close-detail">×</span>
+        <img id="detail-image" src="" alt="卡牌圖像">
+        <div id="card-info">
+          <h2 id="card-title"></h2>
+          <p id="card-number"></p>
+          <p id="card-upright"></p>
+          <p id="card-reversed"></p>
         </div>
-        <button onclick="closeModal()">關閉</button>
       </div>
     </div>
   </div>
