@@ -3,10 +3,28 @@ const modeSelection = document.getElementById('mode-selection');
 const cardArea = document.getElementById('card-area');
 
 const cardData = {
-  'card1': { name: "卡牌1", desc: "這是卡牌1的描述" },
-  'card2': { name: "卡牌2", desc: "這是卡牌2的描述" },
-  // ...
-  'card22': { name: "卡牌22", desc: "這是卡牌22的描述" }
+  'card1':  { name: "1 - 【虛月】",       desc: "代表一切的開端，或許也有未被發現的潛力。" },
+  'card2':  { name: "2 - 【萌月】",     desc: "代表希望萌生，潛能初次顯現。" },
+  'card3':  { name: "3 - 【上弦】",     desc: "象徵行動力湧現，足以面對困境。" },
+  'card4':  { name: "4 - 【盈凸】",       desc: "代表" },
+  'card5':  { name: "5 - 【滿月】",       desc: "象徵穩定、權威與結構。" },
+  'card6':  { name: "6 - 【虧凸】",       desc: "代表傳統、信仰與精神指導。" },
+  'card7':  { name: "7 - 【下弦】",       desc: "象徵愛、選擇與關係的和諧。" },
+  'card8':  { name: "8 - 【殘月】",       desc: "代表勝利、意志力與控制力。" },
+  'card9':  { name: "0-1 - 【裂鏡】",       desc: "象徵內在的勇氣、耐力與慈悲。" },
+  'card10': { name: "0-2 - 【夜泣鳥】",       desc: "代表內省、智慧與指引的燈火。" },
+  'card11': { name: "0-3 - 【蠍影】",   desc: "象徵命運轉變、循環與機遇。" },
+  'card12': { name: "0-4 - 【無聲潮】",       desc: "代表公平、誠實與業力的回應。" },
+  'card13': { name: "0-5 - 【斷線者】",       desc: "象徵犧牲、轉化與重新觀點。" },
+  'card14': { name: "0-6 - 【灰燼之月】",       desc: "象徵結束、釋放與重生的契機。" },
+  'card15': { name: "0-7 - 【命環】",       desc: "代表平衡、耐心與和諧的整合。" },
+  'card16': { name: "0-8 - 【反射之眼】",       desc: "象徵束縛、誘惑與陰影面對。" },
+  'card17': { name: "0-9 - 【綴星書】",         desc: "代表突變、崩壞與真相顯現。" },
+  'card18': { name: "0-10 - 【銀羽】",       desc: "象徵希望、靈感與療癒之光。" },
+  'card19': { name: "0-11 - 【夜旅人】",       desc: "代表幻象、直覺與潛意識的不明。" },
+  'card20': { name: "0-12 - 【倒影雙生】",       desc: "象徵快樂、成功與正面能量。" },
+  'card21': { name: "0-13 - 【夢鉤】",       desc: "代表覺醒、救贖與重新出發。" },
+  'card22': { name: "0-14 - 【淚珠燈】",       desc: "象徵圓滿、整合與完成。" }
 };
 
 startBtn.onclick = () => {
