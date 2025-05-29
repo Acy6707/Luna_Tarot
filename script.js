@@ -1,3 +1,5 @@
+console.log("Script loaded.");
+
 const startBtn = document.getElementById('start-button');
 const modeSelection = document.getElementById('mode-selection');
 const cardArea = document.getElementById('card-area');
