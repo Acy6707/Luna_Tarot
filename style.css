@@ -1,71 +1,139 @@
-/* Reset 基礎樣式 */
-* {
+/* 全域樣式 */
+body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  background: url('bg/background.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Noto Sans TC', sans-serif;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
 }
 
-body {
-  font-family: "Noto Sans TC", "Segoe UI", sans-serif;
-  background: linear-gradient(to bottom right, #1e1e2f, #3e3e5e);
+button {
+  padding: 12px 24px;
+  margin: 12px;
+  font-size: 1.1em;
+  border: none;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.2);
   color: #fff;
-  min-height: 100vh;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.hidden {
+  display: none;
+}
+
+/* 模式選單 */
+#modeButtons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 卡牌區域 */
+#cardArea {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-top: 30px;
+  perspective: 1000px;
 }
 
-/* 卡牌容器 */
-#card-container {
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-  text-align: center;
-  max-width: 600px;
-  width: 100%;
-}
-
-/* 按鈕樣式 */
-#draw-button {
-  background-color: #6c5ce7;
-  color: #fff;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  font-size: 1.1rem;
-  border-radius: 0.5rem;
+/* 卡片樣式 */
+.card {
+  width: 150px;
+  height: 250px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-bottom: 1.5rem;
 }
 
-#draw-button:hover {
-  background-color: #a29bfe;
+.card.flipped {
+  transform: rotateY(180deg);
 }
 
-/* 結果顯示區塊 */
-#result .card-info {
-  background-color: rgba(255, 255, 255, 0.08);
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  margin-top: 1rem;
-  text-align: left;
+.card img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
-#result h2 {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
+.card .card-back {
+  transform: rotateY(0deg);
 }
 
-#result h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-  color: #ffeaa7;
+.card .card-front {
+  transform: rotateY(180deg);
 }
 
-#result p {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #dfe6e9;
+/* 模態視窗 */
+#cardModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 15, 15, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+#cardModal.hidden {
+  display: none;
+}
+
+#cardModalContent {
+  background-color: #1e1e1e;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  position: relative;
+}
+
+#cardModal img {
+  width: 100%;
+  max-width: 250px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+#modalInfo p {
+  margin: 8px 0;
+  font-size: 1em;
+  line-height: 1.5em;
+}
+
+#closeModal {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 1.2em;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #ccc;
+}
+
+#closeModal:hover {
+  color: #fff;
 }
