@@ -131,10 +131,16 @@ function chooseFortune(name, count) {
   drawnCards = [];
   totalDrawn = 0;
   document.getElementById('draw-dialogue').innerHTML = `<p>那麼，我們開始吧。</p>`;
-  setTimeout(() => {
-    switchScreen('select-screen', 'draw-screen');
-    prepareCards();
-  }, 1000);
+
+  // 立即切換畫面
+  switchScreen('select-screen', 'draw-screen');
+
+  // 使用 requestAnimationFrame 確保畫面切換後再生成卡牌
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      prepareCards();
+    });
+  });
 }
 
 function switchScreen(fromId, toId) {
@@ -185,4 +191,3 @@ function shuffle(array) {
 
 </body>
 </html>
-
