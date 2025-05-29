@@ -36,7 +36,7 @@
       font-size: clamp(1rem, 2.5vw, 1.4rem);
     }
 
-    .options button, #start-btn {
+    .options button, #start-btn, #view-btn, #back-btn {
       margin: 10px;
       padding: 10px 20px;
       font-size: 1em;
@@ -48,7 +48,7 @@
       transition: background-color 0.3s;
     }
 
-    .options button:hover, #start-btn:hover {
+    .options button:hover, #start-btn:hover, #view-btn:hover, #back-btn:hover {
       background-color: #666;
     }
 
@@ -127,7 +127,28 @@
       color: #333;
     }
 
-    /* 響應式設計 */
+    #encyclopedia {
+      display: none;
+      padding: 40px;
+      color: white;
+      overflow-y: auto;
+      max-height: 90vh;
+    }
+
+    .card-entry {
+      background: rgba(255,255,255,0.1);
+      padding: 10px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 280px;
+      flex-shrink: 0;
+    }
+
+    .card-entry img {
+      width: 100%;
+      border-radius: 8px;
+    }
+
     @media (min-width: 768px) {
       .dialogue-box {
         width: 60%;
@@ -139,9 +160,6 @@
       .card {
         width: 140px;
         height: 210px;
-      }
-      .modal-content {
-        max-width: 600px;
       }
       .modal-content img {
         width: 260px;
@@ -157,13 +175,10 @@
         width: 180px;
         height: 270px;
       }
-      .modal-content {
-        max-width: 700px;
-      }
       .modal-content img {
         width: 300px;
       }
-      .options button, #start-btn {
+      .options button, #start-btn, #view-btn {
         font-size: 1.2em;
         padding: 14px 32px;
       }
@@ -174,6 +189,7 @@
   <img class="character" src="character/luna-blank.png" alt="露娜">
   <div class="dialogue-box" id="dialogue">
     <button id="start-btn" onclick="showOptions()">開始占卜</button>
+    <button id="view-btn" onclick="showEncyclopedia()">查看月影牌詳細</button>
   </div>
   <div class="card-area" id="card-area"></div>
 
@@ -187,6 +203,8 @@
     </div>
   </div>
 
+  <div id="encyclopedia"></div>
+
   <script src="data/cards.js"></script>
   <script>
     const dialogue = document.getElementById('dialogue');
@@ -196,6 +214,7 @@
     const modalName = document.getElementById('modal-name');
     const modalNumber = document.getElementById('modal-number');
     const modalDescription = document.getElementById('modal-description');
+    const encyclopedia = document.getElementById('encyclopedia');
 
     let drawCount = 0;
     let drawn = 0;
@@ -227,13 +246,17 @@
     };
 
     function showOptions() {
+      encyclopedia.style.display = 'none';
       dialogue.innerHTML = `<p>你想進行哪種占卜呢…？</p>
         <div class="options">
           <button onclick="beginShuffle('初見之禮')">初見之禮</button>
           <button onclick="beginShuffle('單影啟示')">單影啟示</button>
           <button onclick="beginShuffle('月環三問')">月環三問</button>
           <button onclick="beginShuffle('影徑之門')">影徑之門</button>
+          <button id="back-btn" onclick="location.reload()">返回首頁</button>
         </div>`;
+      dialogue.style.display = 'block';
+      cardArea.style.display = 'flex';
     }
 
     function beginShuffle(modeName) {
@@ -313,6 +336,29 @@
 
     function closeModal() {
       modal.style.display = 'none';
+    }
+
+    function showEncyclopedia() {
+      dialogue.style.display = 'none';
+      cardArea.style.display = 'none';
+      modal.style.display = 'none';
+      encyclopedia.innerHTML = `<h2 style='margin-bottom:20px;'>月影牌圖鑑</h2><button id='back-btn' onclick='location.reload()'>返回首頁</button><div style='display:flex; flex-wrap:wrap; gap:20px; justify-content:center;'>`;
+
+      for (let i = 1; i <= 22; i++) {
+        const card = tarotCards[i];
+        encyclopedia.innerHTML += `
+          <div class='card-entry'>
+            <img src="cards/card${i}.png" alt="card${i}">
+            <h4 style="margin: 8px 0 4px;">${card.name} (${card.en})</h4>
+            <p>編號：${i}</p>
+            <p><b>正位：</b>${card.upright}</p>
+            <p><b>逆位：</b>${card.reversed}</p>
+          </div>
+        `;
+      }
+
+      encyclopedia.innerHTML += '</div>';
+      encyclopedia.style.display = 'block';
     }
   </script>
 </body>
