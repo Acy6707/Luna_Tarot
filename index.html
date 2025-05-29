@@ -10,7 +10,7 @@
       padding: 0;
       height: 100vh;
       font-family: 'Noto Sans TC', sans-serif;
-      background: url('bg/background.jpg') center/cover no-repeat;
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('bg/background.jpg') center/cover no-repeat;
       overflow: hidden;
     }
 
@@ -36,7 +36,7 @@
       font-size: clamp(1rem, 2.5vw, 1.4rem);
     }
 
-    .options button, #start-btn, #view-btn, #back-btn {
+    .options button, #start-btn, #view-btn, #back-btn, .menu-toggle, .menu-item {
       margin: 10px;
       padding: 10px 20px;
       font-size: 1em;
@@ -48,7 +48,7 @@
       transition: background-color 0.3s;
     }
 
-    .options button:hover, #start-btn:hover, #view-btn:hover, #back-btn:hover {
+    .options button:hover, #start-btn:hover, #view-btn:hover, #back-btn:hover, .menu-item:hover {
       background-color: #666;
     }
 
@@ -133,6 +133,7 @@
       color: white;
       overflow-y: auto;
       max-height: 90vh;
+      background: linear-gradient(rgba(10,10,10,0.8), rgba(10,10,10,0.8)), url('bg/encyclopedia-bg.jpg') center/cover no-repeat;
     }
 
     .card-entry {
@@ -142,11 +143,38 @@
       width: 100%;
       max-width: 280px;
       flex-shrink: 0;
+      scroll-margin-top: 60px;
     }
 
     .card-entry img {
       width: 100%;
       border-radius: 8px;
+    }
+
+    .encyclopedia-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .menu-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .menu-list {
+      display: none;
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 8px;
+      padding: 10px;
+      z-index: 1000;
     }
 
     @media (min-width: 768px) {
@@ -178,6 +206,9 @@
       .modal-content img {
         width: 300px;
       }
+      .encyclopedia-grid {
+        justify-content: space-between;
+      }
       .options button, #start-btn, #view-btn {
         font-size: 1.2em;
         padding: 14px 32px;
@@ -186,11 +217,15 @@
   </style>
 </head>
 <body>
-  <img class="character" src="character/luna-blank.png" alt="露娜">
+  <img class="character" id="character-img" src="character/luna-blank.png" alt="露娜">
   <div class="dialogue-box" id="dialogue">
     <button id="start-btn" onclick="showOptions()">開始占卜</button>
     <button id="view-btn" onclick="showEncyclopedia()">查看月影牌詳細</button>
   </div>
+
+  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  <div class="menu-list" id="menu-list"></div>
+
   <div class="card-area" id="card-area"></div>
 
   <div class="modal" id="modal">
@@ -207,154 +242,45 @@
 
   <script src="data/cards.js"></script>
   <script>
-    const dialogue = document.getElementById('dialogue');
-    const cardArea = document.getElementById('card-area');
-    const modal = document.getElementById('modal');
-    const modalImg = document.getElementById('modal-img');
-    const modalName = document.getElementById('modal-name');
-    const modalNumber = document.getElementById('modal-number');
-    const modalDescription = document.getElementById('modal-description');
-    const encyclopedia = document.getElementById('encyclopedia');
-
-    let drawCount = 0;
-    let drawn = 0;
-    let drawnCards = [];
-    let allCards = [];
-    let currentMode = null;
-
-    const MODES = {
-      "初見之禮": { count: 1, positions: [ { range: [1, 8] } ] },
-      "單影啟示": { count: 1, positions: [ { range: [1, 8] } ] },
-      "月環三問": {
-        count: 3,
-        positions: [
-          { range: [9, 15] },
-          { range: [1, 8] },
-          { range: [16, 22] }
-        ]
-      },
-      "影徑之門": {
-        count: 5,
-        positions: [
-          { range: [9, 15] },
-          { range: [1, 8] },
-          { range: [1, 8] },
-          { range: [1, 8] },
-          { range: [16, 22] }
-        ]
-      }
-    };
-
-    function showOptions() {
-      encyclopedia.style.display = 'none';
-      dialogue.innerHTML = `<p>你想進行哪種占卜呢…？</p>
-        <div class="options">
-          <button onclick="beginShuffle('初見之禮')">初見之禮</button>
-          <button onclick="beginShuffle('單影啟示')">單影啟示</button>
-          <button onclick="beginShuffle('月環三問')">月環三問</button>
-          <button onclick="beginShuffle('影徑之門')">影徑之門</button>
-          <button id="back-btn" onclick="location.reload()">返回首頁</button>
-        </div>`;
-      dialogue.style.display = 'block';
-      cardArea.style.display = 'flex';
-    }
-
-    function beginShuffle(modeName) {
-      currentMode = MODES[modeName];
-      drawCount = currentMode.count;
-      drawn = 0;
-      drawnCards = [];
-      dialogue.innerHTML = `<p>正在洗牌中...</p>`;
-      setTimeout(() => generateCards(currentMode.positions), 1000);
-    }
-
-    function generateCards(positionConfigs) {
-      cardArea.innerHTML = '';
-      allCards = [];
-
-      positionConfigs.forEach((pos, index) => {
-        const card = document.createElement('div');
-        card.classList.add('card', 'floating');
-        const randomIndex = getRandomInt(pos.range[0], pos.range[1]);
-        card.dataset.index = randomIndex;
-        card.dataset.slot = index;
-        card.onclick = () => drawCard(card);
-        allCards.push(card);
-        cardArea.appendChild(card);
-      });
-
-      dialogue.innerHTML = `<p>請點擊卡牌抽取 ${drawCount} 張</p>`;
-    }
-
-    function getRandomInt(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    function shouldFlip() {
-      return Math.random() < 0.5;
-    }
-
-    function drawCard(card) {
-      if (card.classList.contains('flipped') || drawn >= drawCount) return;
-
-      card.classList.remove('floating');
-      card.style.transform = 'translateY(-20px)';
-
-      const index = card.dataset.index;
-      const isReversed = shouldFlip();
-      card.style.backgroundImage = `url('cards/card${index}.png')`;
-      card.dataset.reversed = isReversed;
-      if (isReversed) card.style.transform += ' rotate(180deg)';
-
-      card.classList.add('flipped');
-      enableDetails(card);
-      drawnCards.push(card);
-      drawn++;
-
-      if (drawn >= drawCount) {
-        dialogue.innerHTML = `<p>抽卡完成，請點擊卡牌查看詳細含義</p>`;
-      } else {
-        dialogue.innerHTML = `<p>請繼續揭開 ${drawCount - drawn} 張卡牌</p>`;
-      }
-    }
-
-    function enableDetails(card) {
-      card.onclick = () => {
-        const index = card.dataset.index;
-        const reversed = card.dataset.reversed === "true";
-        const data = tarotCards[index];
-
-        modalImg.src = `cards/card${index}.png`;
-        modalImg.style.transform = reversed ? 'rotate(180deg)' : 'none';
-        modalName.textContent = `${data.name} (${data.en})`;
-        modalNumber.textContent = `編號：${index}`;
-        modalDescription.textContent = reversed ? `🔄【逆位】\n${data.reversed}` : `【正位】\n${data.upright}`;
-
-        modal.style.display = 'flex';
-      };
-    }
-
-    function closeModal() {
-      modal.style.display = 'none';
+    function toggleMenu() {
+      const menu = document.getElementById('menu-list');
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
     }
 
     function showEncyclopedia() {
-      dialogue.style.display = 'none';
-      cardArea.style.display = 'none';
-      modal.style.display = 'none';
-      encyclopedia.innerHTML = `<h2 style='margin-bottom:20px;'>月影牌圖鑑</h2><button id='back-btn' onclick='location.reload()'>返回首頁</button><div style='display:flex; flex-wrap:wrap; gap:20px; justify-content:center;'>`;
+      document.getElementById('dialogue').style.display = 'none';
+      document.getElementById('card-area').style.display = 'none';
+      document.getElementById('character-img').style.display = 'none';
+      document.getElementById('modal').style.display = 'none';
+
+      const encyclopedia = document.getElementById('encyclopedia');
+      const menu = document.getElementById('menu-list');
+      encyclopedia.innerHTML = `<h2 style='margin-bottom:20px;'>月影牌圖鑑</h2><button id='back-btn' onclick='location.reload()'>返回首頁</button><div class='encyclopedia-grid'>`;
+      menu.innerHTML = '';
 
       for (let i = 1; i <= 22; i++) {
         const card = tarotCards[i];
+        const anchorId = `card${i}`;
+
+        // 圖鑑內容
         encyclopedia.innerHTML += `
-          <div class='card-entry'>
+          <div class='card-entry' id='${anchorId}'>
             <img src="cards/card${i}.png" alt="card${i}">
-            <h4 style="margin: 8px 0 4px;">${card.name} (${card.en})</h4>
+            <h4>${card.name} (${card.en})</h4>
             <p>編號：${i}</p>
             <p><b>正位：</b>${card.upright}</p>
             <p><b>逆位：</b>${card.reversed}</p>
           </div>
         `;
+
+        // 目錄列表
+        const btn = document.createElement('button');
+        btn.className = 'menu-item';
+        btn.textContent = `${i}. ${card.name}`;
+        btn.onclick = () => {
+          document.getElementById(anchorId).scrollIntoView({ behavior: 'smooth' });
+        };
+        menu.appendChild(btn);
       }
 
       encyclopedia.innerHTML += '</div>';
@@ -363,3 +289,4 @@
   </script>
 </body>
 </html>
+
