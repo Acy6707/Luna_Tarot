@@ -1,189 +1,39 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>月影牌占卜</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      font-family: 'Noto Sans TC', sans-serif;
-      background: url('bg/GpccF0ubEAUnmr4.jpg') center/cover no-repeat;
-      overflow: hidden;
-    }
-
-    .character {
-      position: absolute;
-      bottom: 0;
-      right: 5%;
-      height: 60%;
-      z-index: 1;
-    }
-
-    .dialogue-box {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-      z-index: 2;
-    }
-
-    .options button, #start-btn {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 1em;
-      border: none;
-      border-radius: 8px;
-      background: #444;
-      color: #fff;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    .options button:hover, #start-btn:hover {
-      background-color: #666;
-    }
-
-    .card-area {
-      position: absolute;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      z-index: 2;
-    }
-
-    .card {
-      width: 80px;
-      height: 120px;
-      background-image: url('cards/back.png');
-      background-size: cover;
-      background-position: center;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-      cursor: pointer;
-      transition: transform 0.6s ease, top 0.5s ease, left 0.5s ease, opacity 0.5s;
-    }
-
-    .floating {
-      animation: float 2s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0); }
-    }
-
-    .flipped {
-      transform: rotateY(180deg);
-      background-image: none;
-    }
-
-    .disappear {
-      top: -200px !important;
-      opacity: 0;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>塔羅牌占卜</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <img class="character" src="character/luna-blank.png" alt="露娜">
-  <div class="dialogue-box" id="dialogue">
-    <button id="start-btn" onclick="showOptions()">開始占卜</button>
+  <div id="app">
+    <img src="bg/background.jpg" id="background" />
+    
+    <div id="start-screen">
+      <button id="start-button">開始占卜</button>
+    </div>
+    
+    <div id="mode-selection" class="hidden">
+      <p>選擇占卜模式：</p>
+      <button class="mode-btn" data-mode="gift">初見之禮</button>
+      <button class="mode-btn" data-mode="solo">單影啟示</button>
+      <button class="mode-btn" data-mode="triple">月環三問</button>
+      <button class="mode-btn" data-mode="path">影徑之門</button>
+    </div>
+    
+    <div id="card-area" class="hidden"></div>
+    
+    <div id="card-modal" class="hidden">
+      <div class="modal-content">
+        <img id="modal-img" />
+        <p id="card-title"></p>
+        <p id="card-desc"></p>
+        <button onclick="closeModal()">關閉</button>
+      </div>
+    </div>
   </div>
-  <div class="card-area" id="card-area"></div>
-
-  <script>
-    const dialogue = document.getElementById('dialogue');
-    const cardArea = document.getElementById('card-area');
-    let drawCount = 0;
-    let drawn = 0;
-    let drawnCards = [];
-    let allCards = [];
-
-    function showOptions() {
-      dialogue.innerHTML = `<p>你想進行哪種占卜呢…？</p>
-        <div class="options">
-          <button onclick="beginShuffle(1)">初見之禮</button>
-          <button onclick="beginShuffle(1)">單影啟示</button>
-          <button onclick="beginShuffle(3)">月環三問</button>
-          <button onclick="beginShuffle(5)">影徑之門</button>
-        </div>`;
-    }
-
-    function beginShuffle(count) {
-      drawCount = count;
-      drawn = 0;
-      drawnCards = [];
-      dialogue.innerHTML = `<p>請稍候，正在洗牌中...</p>`;
-      setTimeout(generateCards, 1200);
-    }
-
-    function generateCards() {
-      cardArea.innerHTML = '';
-      allCards = [];
-
-      for (let i = 0; i < 8; i++) {
-        const card = document.createElement('div');
-        card.classList.add('card', 'floating');
-        card.dataset.index = i + 1;
-        card.onclick = () => drawCard(card);
-        allCards.push(card);
-        cardArea.appendChild(card);
-      }
-
-      dialogue.innerHTML = `<p>請選擇 ${drawCount} 張卡牌</p>`;
-    }
-
-    function drawCard(card) {
-      if (card.classList.contains('flipped') || drawn >= drawCount) return;
-
-      card.classList.remove('floating');
-      card.style.transform = 'translateY(-20px)';
-      card.classList.add('flipped');
-      drawnCards.push(card);
-      drawn++;
-
-      if (drawn < drawCount) {
-        dialogue.innerHTML = `<p>請再選擇 ${drawCount - drawn} 張卡牌</p>`;
-      } else {
-        dialogue.innerHTML = `<p>抽牌完成，展示結果...</p>`;
-        setTimeout(revealResults, 1000);
-      }
-    }
-
-    function revealResults() {
-      // 移除未抽中卡
-      allCards.forEach(card => {
-        if (!drawnCards.includes(card)) {
-          card.classList.remove('floating');
-          card.classList.add('disappear');
-          setTimeout(() => card.remove(), 800);
-        }
-      });
-
-      // 翻牌展示抽到的卡
-      drawnCards.forEach((card, idx) => {
-        setTimeout(() => {
-          card.classList.add('flipped');
-          card.style.backgroundImage = `url('cards/card${card.dataset.index}.png')`;
-        }, 1000 + idx * 600);
-      });
-
-      // 最後更新提示語
-      setTimeout(() => {
-        dialogue.innerHTML = `<p>抽卡結束，請將結果截圖下來後找露娜小姐解牌吧</p>`;
-      }, 1000 + drawnCards.length * 600 + 500);
-    }
-  </script>
+  
+  <script src="script.js"></script>
 </body>
 </html>
