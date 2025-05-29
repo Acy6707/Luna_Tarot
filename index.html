@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>月影牌占卜</title>
   <style>
     body, html {
@@ -19,15 +19,40 @@
       top: 0; left: 0;
       background-size: cover;
       background-position: center;
+      /* 初始位置 */
+      transform: translateX(100%);
     }
     .active {
       display: block;
-      animation: fadeIn 1s ease;
+      transform: translateX(0);
     }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+
+    /* 滑入 */
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+      }
+      to {
+        transform: translateX(0);
+      }
     }
+    /* 滑出 */
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+      }
+      to {
+        transform: translateX(-100%);
+      }
+    }
+
+    .slide-in {
+      animation: slideIn 0.5s forwards ease;
+    }
+    .slide-out {
+      animation: slideOut 0.5s forwards ease;
+    }
+
     .character {
       position: absolute;
       bottom: 0;
@@ -86,7 +111,7 @@
 
 <!-- 初始畫面 -->
 <div class="screen active" id="intro-screen" style="background-image: url('bg/GpccF0ubEAUnmr4.jpg');">
-  <img class="character" src="character/luna-blank.png" alt="露娜">
+  <img class="character" src="character/luna-blank.png" alt="露娜" />
   <div class="dialogue-box">
     <button onclick="startFortune()">開始占卜</button>
   </div>
@@ -94,7 +119,7 @@
 
 <!-- 占卜選擇畫面 -->
 <div class="screen" id="select-screen" style="background-image: url('bg/GpccF0ubEAUnmr4.jpg');">
-  <img class="character" src="character/luna-blank.png" alt="露娜">
+  <img class="character" src="character/luna-blank.png" alt="露娜" />
   <div class="dialogue-box">
     <p>你想進行哪種占卜呢…？</p>
     <div class="options">
@@ -108,7 +133,7 @@
 
 <!-- 抽牌畫面 -->
 <div class="screen" id="draw-screen" style="background-image: url('bg/GpccF0ubEAUnmr4.jpg');">
-  <img class="character" src="character/luna-blank.png" alt="露娜">
+  <img class="character" src="character/luna-blank.png" alt="露娜" />
   <div class="dialogue-box" id="draw-dialogue">
     <p>那麼，我們開始吧。</p>
   </div>
@@ -132,10 +157,8 @@ function chooseFortune(name, count) {
   totalDrawn = 0;
   document.getElementById('draw-dialogue').innerHTML = `<p>那麼，我們開始吧。</p>`;
 
-  // 立即切換畫面
   switchScreen('select-screen', 'draw-screen');
 
-  // 使用 requestAnimationFrame 確保畫面切換後再生成卡牌
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       prepareCards();
@@ -143,9 +166,35 @@ function chooseFortune(name, count) {
   });
 }
 
+/**
+ * 新的 switchScreen 用滑動動畫，先讓 from 畫面滑出，再讓 to 畫面滑入
+ * @param {string} fromId 
+ * @param {string} toId 
+ */
 function switchScreen(fromId, toId) {
-  document.getElementById(fromId).classList.remove('active');
-  document.getElementById(toId).classList.add('active');
+  const fromScreen = document.getElementById(fromId);
+  const toScreen = document.getElementById(toId);
+
+  // 防止重複點擊
+  if (toScreen.classList.contains('active')) return;
+
+  // 新畫面顯示並定位到右側（初始動畫起點）
+  toScreen.style.display = 'block';
+  toScreen.classList.add('slide-in');
+  toScreen.classList.add('active');
+
+  // 讓舊畫面執行滑出動畫
+  fromScreen.classList.add('slide-out');
+
+  // 動畫結束回調，清理 class，隱藏舊畫面
+  function onAnimationEnd() {
+    fromScreen.style.display = 'none';
+    fromScreen.classList.remove('active', 'slide-out');
+    toScreen.classList.remove('slide-in');
+
+    fromScreen.removeEventListener('animationend', onAnimationEnd);
+  }
+  fromScreen.addEventListener('animationend', onAnimationEnd);
 }
 
 function prepareCards() {
