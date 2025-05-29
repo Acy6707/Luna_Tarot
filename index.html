@@ -87,6 +87,41 @@
     .flipped {
       background-image: none;
     }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 999;
+      display: none;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 300px;
+      text-align: center;
+      font-family: 'Noto Sans TC', sans-serif;
+      position: relative;
+    }
+
+    .modal-content img {
+      width: 100px;
+      height: auto;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      cursor: pointer;
+      color: #333;
+    }
   </style>
 </head>
 <body>
@@ -96,10 +131,26 @@
   </div>
   <div class="card-area" id="card-area"></div>
 
+  <div class="modal" id="modal">
+    <div class="modal-content" id="modal-content">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <img id="modal-img" src="" alt="塔羅牌">
+      <h3 id="modal-name"></h3>
+      <p id="modal-number"></p>
+      <p id="modal-description"></p>
+    </div>
+  </div>
+
   <script src="data/cards.js"></script>
   <script>
     const dialogue = document.getElementById('dialogue');
     const cardArea = document.getElementById('card-area');
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modal-img');
+    const modalName = document.getElementById('modal-name');
+    const modalNumber = document.getElementById('modal-number');
+    const modalDescription = document.getElementById('modal-description');
+
     let drawCount = 0;
     let drawn = 0;
     let drawnCards = [];
@@ -192,7 +243,7 @@
       drawn++;
 
       if (drawn >= drawCount) {
-        dialogue.innerHTML = `<p>抽卡完成，請截圖當前畫面並尋找露娜進行解牌。</p>`;
+        dialogue.innerHTML = `<p>抽卡完成，請點擊卡牌查看詳細含義</p>`;
       } else {
         dialogue.innerHTML = `<p>請繼續揭開 ${drawCount - drawn} 張卡牌</p>`;
       }
@@ -204,11 +255,18 @@
         const reversed = card.dataset.reversed === "true";
         const data = tarotCards[index];
 
-        alert(
-          `${data.name} (${data.en})\n\n編號：${index}\n\n` +
-          (reversed ? `🔄【逆位】\n${data.reversed}` : `【正位】\n${data.upright}`)
-        );
+        modalImg.src = `cards/card${index}.png`;
+        modalImg.style.transform = reversed ? 'rotate(180deg)' : 'none';
+        modalName.textContent = `${data.name} (${data.en})`;
+        modalNumber.textContent = `編號：${index}`;
+        modalDescription.textContent = reversed ? `🔄【逆位】\n${data.reversed}` : `【正位】\n${data.upright}`;
+
+        modal.style.display = 'flex';
       };
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
     }
   </script>
 </body>
