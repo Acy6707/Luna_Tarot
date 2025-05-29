@@ -33,6 +33,7 @@
       border-radius: 12px;
       text-align: center;
       z-index: 2;
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
     }
 
     .options button, #start-btn {
@@ -121,6 +122,43 @@
       font-size: 20px;
       cursor: pointer;
       color: #333;
+    }
+
+    /* 響應式設計 */
+    @media (min-width: 768px) {
+      .dialogue-box {
+        width: 60%;
+      }
+      .card-area {
+        gap: 20px;
+      }
+      .card {
+        width: 100px;
+        height: 150px;
+      }
+      .modal-content {
+        max-width: 400px;
+      }
+      .modal-content img {
+        width: 120px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .dialogue-box {
+        width: 50%;
+      }
+      .card {
+        width: 120px;
+        height: 180px;
+      }
+      .modal-content img {
+        width: 140px;
+      }
+      .options button, #start-btn {
+        font-size: 1.1em;
+        padding: 12px 28px;
+      }
     }
   </style>
 </head>
