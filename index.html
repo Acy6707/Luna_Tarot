@@ -178,6 +178,11 @@
           card.style.backgroundImage = `url('cards/card${card.dataset.index}.png')`;
         }, 1000 + idx * 600);
       });
+
+      // 最後更新提示語
+      setTimeout(() => {
+        dialogue.innerHTML = `<p>抽卡結束，請將結果截圖下來後找露娜小姐解牌吧</p>`;
+      }, 1000 + drawnCards.length * 600 + 500);
     }
   </script>
 </body>
