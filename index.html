@@ -60,7 +60,6 @@
       background: #666;
     }
 
-    /* 卡牌樣式 */
     .card-area {
       position: absolute;
       bottom: 120px;
@@ -113,19 +112,14 @@
   <div class="dialogue-box" id="draw-dialogue">
     <p>那麼，我們開始吧。</p>
   </div>
-  <!-- 顯示卡牌背面 -->
-  <div class="card-area" id="card-area">
-    <img src="cards/back.png" class="card">
-    <img src="cards/back.png" class="card">
-    <img src="cards/back.png" class="card">
-    <img src="cards/back.png" class="card">
-    <img src="cards/back.png" class="card">
-  </div>
+  <div class="card-area" id="card-area"></div>
 </div>
 
 <script>
 let selectedMode = '';
 let drawCount = 0;
+let drawnCards = [];
+let totalDrawn = 0;
 
 function startFortune() {
   switchScreen('intro-screen', 'select-screen');
@@ -134,9 +128,12 @@ function startFortune() {
 function chooseFortune(name, count) {
   selectedMode = name;
   drawCount = count;
+  drawnCards = [];
+  totalDrawn = 0;
   document.getElementById('draw-dialogue').innerHTML = `<p>那麼，我們開始吧。</p>`;
   setTimeout(() => {
     switchScreen('select-screen', 'draw-screen');
+    prepareCards();
   }, 1000);
 }
 
@@ -144,7 +141,48 @@ function switchScreen(fromId, toId) {
   document.getElementById(fromId).classList.remove('active');
   document.getElementById(toId).classList.add('active');
 }
+
+function prepareCards() {
+  const cardArea = document.getElementById('card-area');
+  cardArea.innerHTML = '';
+  const totalCards = 10;
+  const cardIndices = Array.from({ length: totalCards }, (_, i) => i + 1);
+  shuffle(cardIndices);
+
+  for (let i = 0; i < totalCards; i++) {
+    const img = document.createElement('img');
+    img.src = 'cards/back.png';
+    img.className = 'card';
+    img.dataset.index = cardIndices[i];
+    img.onclick = () => drawCard(img);
+    cardArea.appendChild(img);
+  }
+}
+
+function drawCard(cardElement) {
+  if (cardElement.classList.contains('flipped') || totalDrawn >= drawCount) return;
+  const cardIndex = cardElement.dataset.index;
+  cardElement.src = `cards/card${cardIndex}.png`;
+  cardElement.classList.add('flipped');
+  drawnCards.push(cardIndex);
+  totalDrawn++;
+
+  if (totalDrawn === drawCount) {
+    document.getElementById('draw-dialogue').innerHTML += `<p>抽牌完成，請截圖記錄結果。</p>`;
+  } else {
+    document.getElementById('draw-dialogue').innerHTML = `<p>請再抽 ${drawCount - totalDrawn} 張牌。</p>`;
+  }
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
 </script>
 
 </body>
 </html>
+
