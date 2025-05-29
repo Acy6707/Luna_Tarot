@@ -59,21 +59,43 @@
     .options button:hover {
       background: #666;
     }
+
+    /* 卡牌樣式 */
+    .card-area {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 10px;
+    }
+    .card {
+      width: 100px;
+      height: auto;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: scale(1.1);
+    }
   </style>
 </head>
 <body>
 
 <!-- 初始畫面 -->
-<div class="screen active" id="intro-screen" style="background-image: url('GpccF0ubEAUnmr4.jpg');">
-  <img class="character" src="luna-blank.png.png" alt="露娜">
+<div class="screen active" id="intro-screen" style="background-image: url('bg/GpccF0ubEAUnmr4.jpg');">
+  <img class="character" src="characters/luna-blank.png" alt="露娜">
   <div class="dialogue-box">
     <button onclick="startFortune()">開始占卜</button>
   </div>
 </div>
 
 <!-- 占卜選擇畫面 -->
-<div class="screen" id="select-screen" style="background-image: url('GpccF0ubEAUnmr4.jpg');">
-  <img class="character" src="luna-blank.png" alt="露娜">
+<div class="screen" id="select-screen" style="background-image: url('bg/GpccF0ubEAUnmr4.jpg');">
+  <img class="character" src="characters/luna-blank.png" alt="露娜">
   <div class="dialogue-box">
     <p>你想進行哪種占卜呢…？</p>
     <div class="options">
@@ -86,10 +108,18 @@
 </div>
 
 <!-- 抽牌畫面 -->
-<div class="screen" id="draw-screen" style="background-image: url('GpccF0ubEAUnmr4.jpg');">
-  <img class="character" src="luna-blank.png" alt="露娜">
+<div class="screen" id="draw-screen" style="background-image: url('bg/GpccF0ubEAUnmr4.jpg');">
+  <img class="character" src="characters/luna-blank.png" alt="露娜">
   <div class="dialogue-box" id="draw-dialogue">
     <p>那麼，我們開始吧。</p>
+  </div>
+  <!-- 顯示卡牌背面 -->
+  <div class="card-area" id="card-area">
+    <img src="cards/back.png" class="card">
+    <img src="cards/back.png" class="card">
+    <img src="cards/back.png" class="card">
+    <img src="cards/back.png" class="card">
+    <img src="cards/back.png" class="card">
   </div>
 </div>
 
