@@ -8,9 +8,10 @@
     html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden;
+      height: 100vh;
       font-family: 'Noto Sans TC', sans-serif;
       background: url('bg/GpccF0ubEAUnmr4.jpg') center/cover no-repeat;
+      overflow: hidden;
     }
 
     .character {
@@ -23,14 +24,13 @@
 
     .dialogue-box {
       position: absolute;
-      bottom: 20px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%);
       background: rgba(0, 0, 0, 0.7);
       color: #fff;
       padding: 20px;
       border-radius: 12px;
-      max-width: 80vw;
       text-align: center;
       z-index: 2;
     }
@@ -53,15 +53,11 @@
 
     .card-area {
       position: absolute;
-      top: 50%;
+      bottom: 100px;
       left: 50%;
-      transform: translate(-50%, -50%);
-      width: 90vw;
-      height: 60vh;
+      transform: translateX(-50%);
       display: flex;
       justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
       gap: 12px;
       z-index: 2;
     }
@@ -75,8 +71,7 @@
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.4);
       cursor: pointer;
-      position: absolute;
-      transition: transform 0.5s ease, top 0.5s ease, left 0.5s ease;
+      transition: transform 0.6s ease, top 0.5s ease, left 0.5s ease, opacity 0.5s;
     }
 
     .floating {
@@ -90,11 +85,13 @@
     }
 
     .flipped {
-      background-image: none !important;
+      transform: rotateY(180deg);
+      background-image: none;
     }
 
-    .hidden {
-      display: none;
+    .disappear {
+      top: -200px !important;
+      opacity: 0;
     }
   </style>
 </head>
@@ -125,8 +122,10 @@
 
     function beginShuffle(count) {
       drawCount = count;
+      drawn = 0;
+      drawnCards = [];
       dialogue.innerHTML = `<p>請稍候，正在洗牌中...</p>`;
-      generateCards();
+      setTimeout(generateCards, 1200);
     }
 
     function generateCards() {
@@ -135,51 +134,21 @@
 
       for (let i = 0; i < 8; i++) {
         const card = document.createElement('div');
-        card.classList.add('card');
-        card.style.top = `${50 + Math.random() * 20}px`;
-        card.style.left = `${window.innerWidth / 2 + (Math.random() - 0.5) * 200}px`;
+        card.classList.add('card', 'floating');
         card.dataset.index = i + 1;
+        card.onclick = () => drawCard(card);
         allCards.push(card);
         cardArea.appendChild(card);
       }
 
-      let shuffleTimes = 8;
-      let count = 0;
-      const shuffleInterval = setInterval(() => {
-        allCards.forEach((card, idx) => {
-          card.style.zIndex = idx;
-          cardArea.appendChild(card);
-        });
-        allCards.push(allCards.shift());
-        count++;
-        if (count >= shuffleTimes) {
-          clearInterval(shuffleInterval);
-          organizeCards();
-        }
-      }, 300);
-    }
-
-    function organizeCards() {
-      allCards.forEach((card, idx) => {
-        card.style.position = 'absolute';
-        card.style.top = '50%';
-        card.style.left = `${calcX(idx)}px`;
-        card.classList.add('floating');
-        card.onclick = () => drawCard(card);
-      });
       dialogue.innerHTML = `<p>請選擇 ${drawCount} 張卡牌</p>`;
-    }
-
-    function calcX(idx) {
-      const spacing = 100;
-      const startX = window.innerWidth / 2 - ((8 - 1) / 2) * spacing;
-      return startX + idx * spacing;
     }
 
     function drawCard(card) {
       if (card.classList.contains('flipped') || drawn >= drawCount) return;
+
       card.classList.remove('floating');
-      card.style.top = '40%';
+      card.style.transform = 'translateY(-20px)';
       card.classList.add('flipped');
       drawnCards.push(card);
       drawn++;
@@ -188,24 +157,26 @@
         dialogue.innerHTML = `<p>請再選擇 ${drawCount - drawn} 張卡牌</p>`;
       } else {
         dialogue.innerHTML = `<p>抽牌完成，展示結果...</p>`;
-        revealResults();
+        setTimeout(revealResults, 1000);
       }
     }
 
     function revealResults() {
-      // 移除未抽中的卡
+      // 移除未抽中卡
       allCards.forEach(card => {
         if (!drawnCards.includes(card)) {
-          card.style.transition = 'top 0.8s ease';
-          card.style.top = '-200px';
+          card.classList.remove('floating');
+          card.classList.add('disappear');
+          setTimeout(() => card.remove(), 800);
         }
       });
 
-      // 展示抽到的卡
+      // 翻牌展示抽到的卡
       drawnCards.forEach((card, idx) => {
         setTimeout(() => {
+          card.classList.add('flipped');
           card.style.backgroundImage = `url('cards/card${card.dataset.index}.png')`;
-        }, 1000 + idx * 500);
+        }, 1000 + idx * 600);
       });
     }
   </script>
