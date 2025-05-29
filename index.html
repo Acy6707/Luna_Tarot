@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>月影牌占卜</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+    .screen {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0; left: 0;
+      background-size: cover;
+      background-position: center;
+    }
+    .active {
+      display: block;
+      animation: fadeIn 1s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .character {
+      position: absolute;
+      bottom: 0;
+      right: 5%;
+      height: 60%;
+    }
+    .dialogue-box {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      color: #fff;
+      border-radius: 12px;
+      max-width: 80vw;
+      text-align: center;
+    }
+    .options button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      background: #444;
+      color: #fff;
+      cursor: pointer;
+    }
+    .options button:hover {
+      background: #666;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 初始畫面 -->
+<div class="screen active" id="intro-screen" style="background-image: url('bg/intro.jpg');">
+  <img class="character" src="characters/luna.png" alt="露娜">
+  <div class="dialogue-box">
+    <button onclick="startFortune()">開始占卜</button>
+  </div>
+</div>
+
+<!-- 占卜選擇畫面 -->
+<div class="screen" id="select-screen" style="background-image: url('bg/select.jpg');">
+  <img class="character" src="characters/luna.png" alt="露娜">
+  <div class="dialogue-box">
+    <p>你想進行哪種占卜呢…？</p>
+    <div class="options">
+      <button onclick="chooseFortune('初見之禮', 1)">初見之禮</button>
+      <button onclick="chooseFortune('單影啟示', 1)">單影啟示</button>
+      <button onclick="chooseFortune('月環三問', 3)">月環三問</button>
+      <button onclick="chooseFortune('影徑之門', 5)">影徑之門</button>
+    </div>
+  </div>
+</div>
+
+<!-- 抽牌畫面 -->
+<div class="screen" id="draw-screen" style="background-image: url('bg/draw.jpg');">
+  <img class="character" src="characters/luna.png" alt="露娜">
+  <div class="dialogue-box" id="draw-dialogue">
+    <p>那麼，我們開始吧。</p>
+  </div>
+</div>
+
+<script>
+let selectedMode = '';
+let drawCount = 0;
+
+function startFortune() {
+  switchScreen('intro-screen', 'select-screen');
+}
+
+function chooseFortune(name, count) {
+  selectedMode = name;
+  drawCount = count;
+  document.getElementById('draw-dialogue').innerHTML = `<p>那麼，我們開始吧。</p>`;
+  setTimeout(() => {
+    switchScreen('select-screen', 'draw-screen');
+  }, 1000);
+}
+
+function switchScreen(fromId, toId) {
+  document.getElementById(fromId).classList.remove('active');
+  document.getElementById(toId).classList.add('active');
+}
+</script>
+
+</body>
+</html>
