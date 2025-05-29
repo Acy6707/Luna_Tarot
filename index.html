@@ -1,47 +1,215 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>塔羅占卜</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>月影牌占卜</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      font-family: 'Noto Sans TC', sans-serif;
+      background: url('bg/background.jpg') center/cover no-repeat;
+      overflow: hidden;
+    }
+
+    .character {
+      position: absolute;
+      bottom: 0;
+      right: 5%;
+      height: 60%;
+      z-index: 1;
+    }
+
+    .dialogue-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .options button, #start-btn {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      background: #444;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .options button:hover, #start-btn:hover {
+      background-color: #666;
+    }
+
+    .card-area {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      z-index: 2;
+    }
+
+    .card {
+      width: 80px;
+      height: 120px;
+      background-image: url('cards/back.png');
+      background-size: cover;
+      background-position: center;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      cursor: pointer;
+      transition: transform 0.6s ease;
+    }
+
+    .floating {
+      animation: float 2s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+
+    .flipped {
+      background-image: none;
+    }
+  </style>
 </head>
 <body>
-  <div class="background">
-    <img src="bg/background.jpg" alt="背景圖" class="background-img" />
+  <img class="character" src="character/luna-blank.png" alt="露娜">
+  <div class="dialogue-box" id="dialogue">
+    <button id="start-btn" onclick="showOptions()">開始占卜</button>
   </div>
+  <div class="card-area" id="card-area"></div>
 
-  <div class="main-container">
-    <div id="start-screen" class="screen">
-      <button id="start-button" class="start-button">開始占卜</button>
-    </div>
+  <script src="data/cards.js"></script>
+  <script>
+    const dialogue = document.getElementById('dialogue');
+    const cardArea = document.getElementById('card-area');
+    let drawCount = 0;
+    let drawn = 0;
+    let drawnCards = [];
+    let allCards = [];
+    let currentMode = null;
 
-    <div id="mode-selection" class="screen hidden">
-      <p>請選擇占卜模式：</p>
-      <div class="mode-buttons">
-        <button class="mode-button" data-mode="gift">初見之禮</button>
-        <button class="mode-button" data-mode="single">單影啟示</button>
-        <button class="mode-button" data-mode="triple">月環三問</button>
-        <button class="mode-button" data-mode="path">影徑之門</button>
-      </div>
-    </div>
+    const MODES = {
+      "初見之禮": { count: 1, positions: [ { range: [1, 8] } ] },
+      "單影啟示": { count: 1, positions: [ { range: [1, 8] } ] },
+      "月環三問": {
+        count: 3,
+        positions: [
+          { range: [9, 15] },
+          { range: [1, 8] },
+          { range: [16, 22] }
+        ]
+      },
+      "影徑之門": {
+        count: 5,
+        positions: [
+          { range: [9, 15] },
+          { range: [1, 8] },
+          { range: [1, 8] },
+          { range: [1, 8] },
+          { range: [16, 22] }
+        ]
+      }
+    };
 
-    <div id="card-container" class="card-container hidden"></div>
+    function showOptions() {
+      dialogue.innerHTML = `<p>你想進行哪種占卜呢…？</p>
+        <div class="options">
+          <button onclick="beginShuffle('初見之禮')">初見之禮</button>
+          <button onclick="beginShuffle('單影啟示')">單影啟示</button>
+          <button onclick="beginShuffle('月環三問')">月環三問</button>
+          <button onclick="beginShuffle('影徑之門')">影徑之門</button>
+        </div>`;
+    }
 
-    <div id="card-detail" class="card-detail hidden">
-      <div class="card-detail-content">
-        <span id="close-detail">×</span>
-        <img id="detail-image" src="" alt="卡牌圖像">
-        <div id="card-info">
-          <h2 id="card-title"></h2>
-          <p id="card-number"></p>
-          <p id="card-upright"></p>
-          <p id="card-reversed"></p>
-        </div>
-      </div>
-    </div>
-  </div>
+    function beginShuffle(modeName) {
+      currentMode = MODES[modeName];
+      drawCount = currentMode.count;
+      drawn = 0;
+      drawnCards = [];
+      dialogue.innerHTML = `<p>正在洗牌中...</p>`;
+      setTimeout(() => generateCards(currentMode.positions), 1000);
+    }
 
-  <script src="script.js"></script>
+    function generateCards(positionConfigs) {
+      cardArea.innerHTML = '';
+      allCards = [];
+
+      positionConfigs.forEach((pos, index) => {
+        const card = document.createElement('div');
+        card.classList.add('card', 'floating');
+        const randomIndex = getRandomInt(pos.range[0], pos.range[1]);
+        card.dataset.index = randomIndex;
+        card.dataset.slot = index;
+        card.onclick = () => drawCard(card);
+        allCards.push(card);
+        cardArea.appendChild(card);
+      });
+
+      dialogue.innerHTML = `<p>請點擊卡牌抽取 ${drawCount} 張</p>`;
+    }
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function shouldFlip() {
+      return Math.random() < 0.5;
+    }
+
+    function drawCard(card) {
+      if (card.classList.contains('flipped') || drawn >= drawCount) return;
+
+      card.classList.remove('floating');
+      card.style.transform = 'translateY(-20px)';
+
+      const index = card.dataset.index;
+      const isReversed = shouldFlip();
+      card.style.backgroundImage = `url('cards/card${index}.png')`;
+      card.dataset.reversed = isReversed;
+      if (isReversed) card.style.transform += ' rotate(180deg)';
+
+      card.classList.add('flipped');
+      enableDetails(card);
+      drawnCards.push(card);
+      drawn++;
+
+      if (drawn >= drawCount) {
+        dialogue.innerHTML = `<p>抽卡完成，請點擊卡牌查看詳細含義</p>`;
+      } else {
+        dialogue.innerHTML = `<p>請再抽 ${drawCount - drawn} 張卡牌</p>`;
+      }
+    }
+
+    function enableDetails(card) {
+      card.onclick = () => {
+        const index = card.dataset.index;
+        const reversed = card.dataset.reversed === "true";
+        const data = tarotCards[index];
+
+        alert(
+          `${data.name} (${data.en})\n\n編號：${index}\n\n` +
+          (reversed ? `🔄【逆位】\n${data.reversed}` : `【正位】\n${data.upright}`)
+        );
+      };
+    }
+  </script>
 </body>
 </html>
